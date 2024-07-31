@@ -1,5 +1,3 @@
-// Hello world
-
 const path = require("path");
 const fs = require("fs");
 const express = require("express");
@@ -14,13 +12,31 @@ const helmet = require("helmet");
 const compression = require("compression");
 const moragn = require("morgan");
 const https = require("https");
-
 const errorController = require("./controllers/error");
 const User = require("./models/user");
-
-const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.xn9uu3o.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}`;
-
 const app = express();
+require('dotenv').config();
+
+console.log('MONGO_USER:', process.env.MONGO_USER);
+console.log('MONGO_PASSWORD:', process.env.MONGO_PASSWORD);
+console.log('MONGO_DEFAULT_DATABASE:', process.env.MONGO_DEFAULT_DATABASE);
+
+
+const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.7kzqrdc.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}?retryWrites=true&w=majority`;
+const options = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true // Enables the new Server Discovery and Monitoring engine
+};
+mongoose
+    .connect(MONGODB_URI ,options)
+    .then(() => {
+        console.log("Connected to the database!");
+    })
+    .catch((err) => {
+        console.log("Database connection failed: ",err);
+    });
+
+
 const store = new MongoDBStore({
   uri: MONGODB_URI,
   collection: "sessions",
@@ -57,6 +73,7 @@ app.set("views", "views");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
+const http = require("http");
 
 const accessLogStream = fs.createWriteStream(
   path.join(__dirname, "access.log"),
@@ -116,22 +133,32 @@ app.get("/500", errorController.get500);
 
 app.use(errorController.get404);
 
-// app.use((error, req, res, next) => {
-//   // res.status(error.httpStatusCode).render(...);
-//   // res.redirect('/500');
-//   res.status(500).render("500", {
-//     pageTitle: "Error!",
-//     path: "/500",
-//     isAuthenticated: req.session.isLoggedIn,
-//   });
-// });
-
-mongoose
-  .connect(MONGODB_URI)
-  .then((result) => {
-    // https.createServer({ key: privateKey, cert: certificate }, app).listen(process.env.PORT || 3000);
-    app.listen(process.env.PORT || 3000);
-  })
-  .catch((err) => {
-    console.log(err);
+app.use((error, req, res, next) => {
+  // res.status(error.httpStatusCode).render(...);
+  // res.redirect('/500');
+  res.status(500).render("500", {
+    pageTitle: "Error!",
+    path: "/500",
+    isAuthenticated: req.session.isLoggedIn,
   });
+});
+
+const normalizePort = val => {
+    var port = parseInt(val, 10);
+
+    if (isNaN(port)) {
+        // named pipe
+        return val;
+    }
+
+    if (port >= 0) {
+        // port number
+        return port;
+    }
+
+    return false;
+};
+const port = normalizePort(process.env.PORT || "8080");
+app.set("port", port);
+const server = http.createServer(app);
+server.listen(port);
