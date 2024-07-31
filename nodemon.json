@@ -1,7 +1,7 @@
 {
   "env": {
     "NODE_ENV": "Prodcution",
-    "MONGO_USER": "Saeed",
+    "MONGO_USER": "Mohamed_424",
     "MONGO_PASSWORD": "205505",
     "MONGO_DEFAULT_DATABASE": "ShopShopy",
     "STRIPE_KEY": "sk_test_51MplUVAHpN64YHlylSqoNDWXUJKKvyix4uY2DPQVjeZz6CavJ520Q3E7mz5n5SMxGURYbl0KqtcnMD6DZFLXFRB100fHyk9tkO"
